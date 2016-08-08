@@ -14,8 +14,22 @@
 #    What if the number of rows is much larger than the number of columns?
 #
 #    Brutal Force
+#    优化了从一个数组找到小于k的最大子序列和，n*logn
+#    整个是 m^2*n*logn
 
-def maxSubmatrix(matrix, k)
+require "rbtree"
+
+#问题首先落在如何遍历所有的submatrix，m x m的matrix总共有 Σn * Σm个，Σi 表示1到i的和
+#这样考虑，对于n行的矩阵，取i=1行，有1-n共n行
+#取 i=2 有 12, 23, 34, ..., n-1n 共n-1行
+#以此类推，最后一个就是n行，只有一个
+#固行有 1+...+n 种情况
+#对于列，同理可得有 1+...+m 种情况，
+#所以，总共有 Σn * Σ个submatrix
+#
+#遍历的话，从第一行开始，找出subarrayLtK，然后将第二行加到第一行再执行subarrayLtk，然后将第三行加上去依次类推直到加上最后一行
+#然后，对第二行执行以上的过程，直到最后一行
+def maxSubmatrixLtK(matrix, k)
 	row = matrix.size
 	col = matrix[0].size
 	m = matrix
@@ -40,7 +54,7 @@ def maxSubmatrix(matrix, k)
 	while i<row do 
 		l = i
 		while l<row do
-			tmp = maxSubarray(m[i], k)
+			tmp = maxSubarrayLtK(m[i], k)
 			if tmp == k then
 				return k
 			end
@@ -58,30 +72,47 @@ def maxSubmatrix(matrix, k)
 	end
 	return max
 end
-def maxSubarray(a, k)
-	n = a.size
-	tmp = Array.new
+
+#问题归结为如何求数组的最大不超过k子序列和：
+#获得一个前i项和的序列，那么对于任意的sj-si就表示子序列a(i+1)-aj的和，sj-0表示a0-aj的和
+#要满足的条件有
+#	i<j
+#	sj-si<=k => sj-k<=si
+#	想要sj-si尽量逼近k，也就是让sj-k尽量逼近si，利用二叉搜索树
+#	遍历j 0->s.size-1，对于任意的sj，在si中找出最接近但大于等于sj-k的si，i取值为[0,j)
+#	lower_bound满足这个需求 ... , sj-k, [lower_bound ...
+#	upper_bound返回同一个东西，但是不包含等于，... , sj-k, (upper_bound ...
+def maxSubarrayLtK(a, k)
+	sums = Array.new(a.size) 
 	i = 0
-	while i<n do
-		tmp.push(a[i])
+	sum = 0
+	while i<sums.size do
+		sum += a[i]
+		sums[i] = sum
 		i += 1
 	end
+	rbt = RBTree.new
+	#为了得到序列[0-j] sj-0，将0先放进去
+	rbt[0] = nil
+	max = nil
 	i = 0
-	max = tmp[0]
-	while i<n do
-		l = i
-		while l<n do
-			cur = tmp[i]
-			if cur==k then
-				return k
-			elsif (cur<k and cur>max) or max>k then
-				max = cur
+	while i<sums.size do
+		# puts "#{sums[i]} #{rbt}"
+		cur= rbt.lower_bound(sums[i]-k)
+		if not cur.nil? then
+			tmp = sums[i]-cur[0]
+			if tmp==k then return k end
+			if max.nil? then
+				if tmp<=k then
+					max = tmp
+				end
+			else
+				if tmp>max then
+					max = tmp
+				end
 			end
-			if l+1<n then
-				tmp[i] += tmp[l+1]
-			end
-			l += 1
 		end
+		rbt[sums[i]] = nil
 		i += 1
 	end
 	return max
@@ -89,10 +120,10 @@ end
 
 a0 = Array[1, 0, 1]
 a1 = Array[2, 2, -1]
-puts "#{a0} #{maxSubarray(a0, 2)}"
-puts "#{a1} #{maxSubarray(a1, 0)}"
+puts "#{a0} #{maxSubarrayLtK(a0, 2)}"
+puts "#{a1} #{maxSubarrayLtK(a1, 3)}"
 m = Array[a1]
-puts "#{m} #{maxSubmatrix(m, 0)}"
+puts "#{m} #{maxSubmatrixLtK(m, 0)}"
 m = Array[[9,-10,-3,-1,1,7,-6,-2,1,-4,-6,-8,-1,2,-9,-7,-9,-1,-1,5,-4,5,-8,3,4,2,9,4,5,4,-8,5,4,-9,-10,3,-2,-2,9,0,-4,3,5,-10,8,-10,9,-7,-6,1,2,6,-8,1,7,3,0,-5,7,-6,1,9,-8,4,-7,-9,1,8,-2,6,-1,0,8,4,-9,8,-3,7,-4,3,-6,2,-1,-2,-10,-10,-10,-3,8,2,-4,3,-6,-3,1,9,-9,7,-6,8],
 Array[8,-10,-4,-5,7,2,-6,7,-9,0,-8,9,-4,-5,-2,3,2,7,3,3,0,-3,-10,8,-9,3,-6,-9,3,-10,9,9,-3,6,-8,-7,5,5,9,5,-6,6,1,4,4,-5,-1,2,9,-8,8,-9,-9,-6,8,-3,1,0,-7,9,8,-3,-9,-4,8,-2,-9,2,7,-3,0,6,-7,3,3,-8,1,-2,-6,-5,3,6,0,-9,-6,-4,-10,-6,8,3,1,0,-1,-5,-10,5,-2,-5,-10,6],
 Array[-3,-5,-1,-8,-7,-6,-6,0,7,0,3,-6,-9,7,-5,-7,8,4,-4,2,7,-4,-6,4,-9,-8,-1,-9,-1,8,3,8,-2,2,-2,5,9,-1,3,-6,8,2,-6,-2,2,2,-8,-2,-2,0,6,2,2,4,-1,-3,-3,4,-2,4,-6,-7,3,2,-6,3,5,-10,-6,7,-4,-4,-3,-5,-8,-7,-9,-8,-7,5,-9,7,8,-10,7,6,6,-1,-3,4,4,-2,3,-1,-9,-10,-5,-7,8,-1],
@@ -194,4 +225,4 @@ Array[3,3,-7,-5,9,-8,-6,-9,-7,8,-7,-9,1,-5,1,4,9,-1,-1,1,-7,4,-1,0,5,-1,3,6,-6,7
 Array[9,3,7,-1,1,-1,-4,5,-10,-7,-10,6,-4,-7,-9,-2,-1,-4,1,5,-9,5,-1,-9,-7,5,-4,-8,0,-3,3,7,-1,-4,-4,-4,-2,-2,3,-6,-1,1,-3,2,0,1,-9,-6,-10,-9,6,-3,-4,-10,-1,8,-4,8,-10,4,-4,-8,-6,8,5,6,6,-3,0,0,3,-8,6,-5,9,9,-10,-2,-5,6,4,-2,-9,5,5,9,1,1,8,9,-6,6,7,-1,4,-8,2,-7,-8,6],
 Array[6,-8,-7,7,2,-2,-5,9,-5,-2,-2,4,-6,8,4,5,-2,-9,8,-5,-2,2,4,-2,7,-5,5,-5,2,6,-10,3,9,-6,3,-9,-8,-5,-9,-10,-2,-5,-4,9,-9,-6,-3,4,4,-8,-5,-10,5,-10,-8,-9,3,7,-10,-4,-6,4,-8,3,9,-10,-6,3,3,8,-3,-2,0,-8,1,-7,8,-2,-6,-8,-5,2,0,-6,6,-7,3,-1,-3,4,1,4,6,0,-2,7,0,9,-9,4]]
 
-puts "#{m} #{maxSubmatrix(m, 292)}"
+puts "#{m} #{maxSubmatrixLtK(m, 292)}"

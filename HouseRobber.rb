@@ -7,9 +7,17 @@ def nonadjointMaxSum(nums)
 	dp = []
 	(0...nums.size).each{ |i| 
 		dp[i] = [nums[i]+(i-2<0 ? 0 : dp[i-2]), (i-1<0 ? 0 : dp[i-1])].max
-		puts "#{i} : #{dp[i]}"
+		#puts "#{i} : #{dp[i]}"
 	}
 	dp[nums.size-1]||0
+end
+
+def rob(nums)
+  before_last, last = 0, 0
+  for i in nums do
+    before_last, last = last, [before_last+i, last].max
+  end
+  last
 end
 
 [
@@ -19,4 +27,5 @@ end
 	[1,1]
 ].each{ |x| 
 	puts "#{x} : #{nonadjointMaxSum x}"
+	puts "#{x} : #{rob x}"
 }

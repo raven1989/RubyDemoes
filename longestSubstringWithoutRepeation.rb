@@ -1,10 +1,13 @@
 #!/usr/bin/ruby
 
 def longestSubstringWithoutRepeation(str)
-	alphabet = Hash.new
-	'abcdefghijklmnopqrstuvwxyz'.split('').map {|c| alphabet[c]=-1}
+	# alphabet = Hash.new
+	# 'abcdefghijklmnopqrstuvwxyz'.split('').map {|c| alphabet[c]=-1}
 	# puts "#{alphabet}"
-	array = str.split('')
+	alphabet = Array.new(256) {|e| e=-1 }
+	# array = str.split('')
+	array = [] 
+	str.each_byte{ |x| array<<x }
 	#index[i]记录上一次array[i]这个字符出现的位置索引
 	index = Array.new(array.size)
 	for i in 0...index.size do
@@ -29,12 +32,19 @@ def longestSubstringWithoutRepeation(str)
 		if i<array.size then
 			head = index[i] + 1
 			len = i-head+1
+			i += 1
 		end
 	end
 	return str[max_head,max_head+max_len]
 end
 
 # substr = longestSubstringWithoutRepeation 'abbcv'
-substr = longestSubstringWithoutRepeation 'abcbcv'
+# substr = longestSubstringWithoutRepeation 'abcbcv'
 # substr = longestSubstringWithoutRepeation 'abcdae'
-puts substr
+# puts substr
+[
+	"abcabcbb",
+	"abbcv",
+].each{|x|
+	puts "#{x} : #{longestSubstringWithoutRepeation x}"
+}

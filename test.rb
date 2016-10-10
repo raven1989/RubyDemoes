@@ -32,7 +32,7 @@ class E < Struct.new(:value)
 end
 
 eheap = Heap.new()
-e = Array[E.new(4), E.new(3), E.new(5), E.new(2)]
+e = Array[E.new(1), E.new(1), E.new(2), E.new(1), E.new(2), E.new(2)]
 for it in e do
 	eheap.push(it)
 end

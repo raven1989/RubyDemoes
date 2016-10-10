@@ -22,6 +22,7 @@ end
 
 # steps = Array[1,1,1,1,1]
 # steps = Array[3,1,1,0,2]
-steps = Array[4,2,3,1,0]
+# steps = Array[4,2,3,1,0]
+steps = Array[4,2,2,1,0,2]
 res = jump steps
 puts "#{steps} #{res}"

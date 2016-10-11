@@ -63,10 +63,31 @@ def swap4Pair(i,j)
 	end
 end
 
+#再写一个深度后续回溯置换，利用i表示第几个元素(i=0,1,...)
+#if i%2==0, 这时候要交换当前节点和当前节点的next
+#if i%2==1, 这时候不需要交换，就返回当前节点
+def postSwapPairs(head, ith)
+	if head.nil? or head.next.nil? then
+		head
+	else
+		last = postSwapPairs(head.next, ith+1)
+		if ith%2==0 then
+			head.next = last.next
+			last.next = head
+			last
+		else
+			head.next = last
+			head
+		end
+	end
+end
+
 
 [
 	[],
 	[1,2,3,4],
+	[1,2,3,4,5],
 ].each{|x|
 	puts "#{x} : #{swapPairs(a2lHelper(x))}"
+	puts "#{x} : #{postSwapPairs(a2lHelper(x), 0)}"
 }

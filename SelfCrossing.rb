@@ -1,5 +1,6 @@
 #!/usr/bin/ruby
 #
+# not finished
 
 def selfCrossing?(nums)
 	quad = Array.new(4)

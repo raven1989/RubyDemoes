@@ -4,6 +4,14 @@
  * 
  * Another example is ")()())", where the longest valid parentheses substring is "()()", which has length = 4. */
 
+#include<iostream>
+#include<vector>
+#include<stack>
+#include<sstream>
+using namespace std;
+
+string printHelper(const vector<int>&);
+
 /* 利用栈来匹配括号
  * 1. 考虑一对valid parentheses：()
  *    压栈(，遇到)弹栈，每弹一次len+=2，直到不能弹栈为止，此时栈的大小为0，用v[0]这个索引记住len
@@ -24,15 +32,6 @@
  *    如果是一组合法的括号解，那么最终肯定会更新到v[0]，而其他位数字都是0；
  *    当其中有一个非法括号时，会有两组解，第一组解更新到v[0]，第二组解更新到v[k] (k=非法括号索引+1)
  *    因为合法组解最终会弹栈到这些位置 */
-
-#include<iostream>
-#include<vector>
-#include<stack>
-#include<sstream>
-using namespace std;
-
-string printHelper(const vector<int>&);
-
 int longestValidParentheses(const string& str){
   int res = 0;
   if(str.size()<=0){
@@ -88,8 +87,83 @@ string printHelper(const vector<int>& v){
   return oss.str();
 }
 
+// 利用栈压索引:
+// 遇到str[i]=)并且栈顶是str[stack.top]=(时弹栈，弹完栈后，i和当前栈顶的索引差值就是合法的括号序列长度
+// 1. set i=0, 遍历str
+// 2. if str[i]==(, 将i压栈
+// 3. else str[i]==):
+//    a. if stack为空 || stack.top==), 将i压栈
+//    b. else stack.top==(:
+//       stack.pop;
+//       if stack为空, len=i+1
+//       else len=i-stack.top
+//       if len>longest, 更新longest=len
+// 4. 返回longest
+int longestValidParenthesesByIndexStack(const string& str){
+  int longest = 0;
+  if(str.size()<=1) return longest;
+  stack<int> s;
+  for(int i=0; i<str.size(); ++i){
+    char cur = str[i];
+    if(cur=='('){
+      s.push(i);
+    }else{
+      if(s.empty()||str[s.top()]==')'){
+        s.push(i);
+      }else{
+        int len = 0;
+        s.pop();
+        if(s.empty()){
+          len = i+1;
+        }else{
+          len = i-s.top();
+        }
+        if(len>longest){
+          longest = len;
+        }
+      }
+    }
+  }
+  return longest;
+}
+
+// Dp Solution: dp[i]表示从j到i的合法括号组解长度(j<i)
+// 比如：((), dp={0,0,2} 其中dp[2]=2表示(1,2)这里j=1
+// ))() dp={0,0,0,2}
+// 1. 
+
+int longestValidParenthesesByDp(const string& str){
+  int longest = 0;
+  if(str.size()<=1) return longest;
+  vector<int> dp(str.size());
+  for(int i=1; i<str.size(); ++i){
+    if(str[i]==')'){
+      // 如果i前面有合法的括号解序列，那么必然匹配的是这个序列之前的(或)
+      // 比如：((())())
+      //       j      i
+      int j=i-dp[i-1]-1;
+      if(j>=0 && str[j]=='('){
+        // 匹配到(则长度至少增加2，然后再加上i-1位置的合法括号长度
+        // ()这种情况下, 因为(处一定是0，所以+0不影响结果
+        // ji
+        dp[i] = 2+dp[i-1];
+        // 然后如果j-1处也是合法括号序列则应该加上去，如果不是则dp[j-1]=0，加上去也不影响结果
+        if(j>0){
+          dp[i] += dp[j-1];
+        }
+        if(dp[i]>longest){
+          longest = dp[i];
+        }
+      }
+    }
+  }
+  return longest;
+}
+
 int main(){
   string str;
   cin >> str;
   cout << str << " : " << longestValidParentheses(str) << endl;
+  cout << str << " by index stack: " << longestValidParenthesesByIndexStack(str) << endl;
+  cout << str << " by dp: " << longestValidParenthesesByDp(str) << endl;
 }

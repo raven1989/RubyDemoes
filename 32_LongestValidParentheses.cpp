@@ -130,7 +130,17 @@ int longestValidParenthesesByIndexStack(const string& str){
 // Dp Solution: dp[i]表示从j到i的合法括号组解长度(j<i)
 // 比如：((), dp={0,0,2} 其中dp[2]=2表示(1,2)这里j=1
 // ))() dp={0,0,0,2}
-// 1. 
+// 1. set dp[0]=0
+// 2. set i=1, 遍历str
+// 3. if str[i]是(, dp[i]=0
+// 4. else str[i]是):
+//    j = i-dp[i]-1;
+//    if j>=0 && str[j]是(: 
+//       dp[i]=2+dp[i-1]
+//       if j>0, dp[i] += dp[j-1]
+//    if dp[i]>longest, 更新longest=dp[i]
+//    else dp[i]=0
+// 5. 返回longest
 
 int longestValidParenthesesByDp(const string& str){
   int longest = 0;

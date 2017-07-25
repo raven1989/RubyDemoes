@@ -22,9 +22,14 @@ def moveZeroes(nums)
     end
     fast += 1
   end
+  nums
 end
 
-nums = [0,1,0,3,12]
-ori = Array.new(nums)
-moveZeroes nums
-puts "#{ori} : #{nums}"
+[
+  [],
+  [0,0,0],
+  [0,1,0,3,12],
+  [0,0,0,3,12],
+].each{|x|
+  puts "#{x} : #{moveZeroes x}"
+}

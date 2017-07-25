@@ -134,7 +134,7 @@ int longestValidParenthesesByIndexStack(const string& str){
 // 2. set i=1, 遍历str
 // 3. if str[i]是(, dp[i]=0
 // 4. else str[i]是):
-//    j = i-dp[i]-1;
+//    j = i-dp[i-1]-1;
 //    if j>=0 && str[j]是(: 
 //       dp[i]=2+dp[i-1]
 //       if j>0, dp[i] += dp[j-1]

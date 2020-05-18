@@ -90,7 +90,7 @@ def place(i, first, n)
 end
 
 [
-	0, 1, 2, 3,
+	0, 1, 2, 3, 5,
 ].each{|x|
 	puts "#{x} : #{generate x}"
 	puts "#{x} : #{postPlace x}"

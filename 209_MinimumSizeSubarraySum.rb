@@ -26,10 +26,10 @@ def minSubarray(s, nums)
       windowSize = i-left+1
       if windowSize<=minSize then
         res = minSize = windowSize
-        # window 左边往前移动一位
-        sum -= nums[left]
-        left += 1
       end
+      # window 左边往前移动一位
+      sum -= nums[left]
+      left += 1
     end
   }
   res
